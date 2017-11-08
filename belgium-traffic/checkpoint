@@ -1,2 +1,2 @@
-model_checkpoint_path: "/Users/jamie/Documents/Work/python-stuff/belgium-traffic/my_model"
-all_model_checkpoint_paths: "/Users/jamie/Documents/Work/python-stuff/belgium-traffic/my_model"
+model_checkpoint_path: "/Users/jamieg/Documents/Work/Hackday/tensorflow-stuff/belgium-traffic/my_model"
+all_model_checkpoint_paths: "/Users/jamieg/Documents/Work/Hackday/tensorflow-stuff/belgium-traffic/my_model"

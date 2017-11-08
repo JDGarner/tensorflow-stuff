@@ -28,7 +28,7 @@ def load_data(data_directory):
             labels.append(int(d))
     return images, labels
 
-ROOT_PATH = "/Users/jamie/Documents/Work/python-stuff/belgium-traffic/"
+ROOT_PATH = "/Users/jamieg/Documents/Work/Hackday/tensorflow-stuff/belgium-traffic/"
 train_data_directory = os.path.join(ROOT_PATH, "Training")
 test_data_directory = os.path.join(ROOT_PATH, "Testing")
 
@@ -86,7 +86,7 @@ saver = tf.train.Saver()
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    for i in range(1801):
+    for i in range(2):
         _, loss_value = sess.run([train_op, loss], feed_dict={x: images28, y: labels})
         if i % 10 == 0:
             print("EPOCH: ", i)
