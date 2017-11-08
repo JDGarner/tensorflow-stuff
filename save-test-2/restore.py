@@ -12,12 +12,12 @@ saver.restore(sess,tf.train.latest_checkpoint('./'))
 
 graph = tf.get_default_graph()
 x = graph.get_tensor_by_name("x:0")
-feed_dict = {x: [[3.0, 4.0, 7.6], [5.0, 6.0, 6.7]]}
+feed_dict = {x: [[3.0, 4.0], [5.0, 6.0]]}
 
 #Now, access the op that you want to run. 
-op_to_restore = graph.get_tensor_by_name("op_to_restore_2:0")
+# op_to_restore = graph.get_tensor_by_name("op_to_restore_2:0")
 
-print sess.run(op_to_restore,feed_dict)
+print sess.run(x,feed_dict)
 
 
 
