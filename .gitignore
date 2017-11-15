@@ -1,5 +1,7 @@
 belgium-traffic/Training
 belgium-traffic/Testing
+mnist-classifer/data
+mnist-classifer/data/*
 *.meta
 *.index
 *.data*
