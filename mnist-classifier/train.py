@@ -77,3 +77,15 @@ image_predictions = tf.nn.softmax(logits)
 # The most likely class that the network predicted
 image_prediction_class = tf.argmax(image_predictions, dimension=1)
 
+# To improve classifier need to change the variables for weights and biases
+# First need to compare the prediction outputs to the desired output
+# cross-entropy is a performance measure used in classification. 
+# If prediction === desired then the cross-entropy equals zero.
+# Goal of optimization is to minimize the cross-entropy by changing the weights and biases of the model.
+
+# The tensorflow function uses logits because it also calculates the softmax internally.
+cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=true_image_label_placeholder)
+
+# To use the cross-entropy to guide the optimization we need a single scalar value
+# Take the average of the cross-entropy for all the image classifications.
+cost = tf.reduce_mean(cross_entropy)
