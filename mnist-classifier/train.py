@@ -3,7 +3,12 @@ import tensorflow as tf
 import numpy as np
 from sklearn.metrics import confusion_matrix
 
-# LOAD DATA
+
+
+# -------------------------------
+# LOADING THE DATASET
+# -------------------------------
+
 from tensorflow.examples.tutorials.mnist import input_data
 data = input_data.read_data_sets("data/MNIST/", one_hot=True)
 
@@ -18,7 +23,12 @@ img_shape = (img_size, img_size)
 num_classes = 10
 
 
-# HELPER FUNCTION TO PLOT IMAGES
+
+# -------------------------------
+# CHECKING THE DATA
+# -------------------------------
+
+# Helper Function to plot images
 def plot_images(images, cls_true, cls_pred=None):
     assert len(images) == len(cls_true) == 9
     
@@ -47,6 +57,15 @@ def plot_images(images, cls_true, cls_pred=None):
 images = data.test.images[0:9]
 cls_true = data.test.cls[0:9]
 plot_images(images=images, cls_true=cls_true)
+
+
+
+
+
+
+# -------------------------------
+# CREATING THE NETWORK MODEL
+# -------------------------------
 
 # Placeholder for images (None = arbitrary number of images) e.g. [image_index, [...image_pixel_values...]]
 images_placeholder = tf.placeholder(tf.float32, [None, img_size_flat])
@@ -89,3 +108,87 @@ cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=tr
 # To use the cross-entropy to guide the optimization we need a single scalar value
 # Take the average of the cross-entropy for all the image classifications.
 cost = tf.reduce_mean(cross_entropy)
+
+# Now we need an optimiser function to minimise the cost
+# We use a method called Gradient Descent where the step-size is set to 0.5.
+optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.5).minimize(cost)
+
+# Performance measure - an array of booleans to say whether predicted class = true class
+correct_predictions = tf.equal(image_prediction_class, true_image_class_placeholder)
+
+# Performance measure - percentage of correctly predicted classes
+accuracy = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
+
+
+
+
+
+
+# -------------------------------
+# RUNNING TENSORFLOW
+# -------------------------------
+session = tf.Session()
+
+# Initialise the variables for weights and biases
+session.run(tf.global_variables_initializer())
+
+# Number of images per batch of optimsation
+batch_size = 100
+
+# Helper function to perform a set number of optimisation iterations
+def optimize(num_iterations):
+    for i in range(num_iterations):
+        # Get a batch of training data
+        images_batch, image_labels_batch = data.train.next_batch(batch_size)
+        
+        # Load the batch data into our placeholders
+        feed_dict_train = {
+          images_placeholder: images_batch,
+          true_image_label_placeholder: image_labels_batch
+        }
+
+        # Run the optimizer using this batch of training data
+        session.run(optimizer, feed_dict=feed_dict_train)
+
+
+feed_dict_test = {
+  images_placeholder: data.test.images,
+  true_image_label_placeholder: data.test.labels,
+  true_image_label_placeholder: data.test.cls
+}
+
+# Function for printing accuracy of network on the test data
+def print_accuracy():
+    # Use TensorFlow to compute the accuracy.
+    acc = session.run(accuracy, feed_dict=feed_dict_test)
+    
+    # Print the accuracy.
+    print("Accuracy on test-set: {0:.1%}".format(acc))
+
+
+# Function for printing and plotting the confusion matrix
+def print_confusion_matrix():
+    # Get the true classifications for the test-set.
+    cls_true = data.test.cls
+    
+    # Get the predicted classifications for the test-set.
+    cls_pred = session.run(y_pred_cls, feed_dict=feed_dict_test)
+
+    # Get the confusion matrix using sklearn.
+    cm = confusion_matrix(y_true=cls_true,
+                          y_pred=cls_pred)
+
+    # Print the confusion matrix as text.
+    print(cm)
+
+    # Plot the confusion matrix as an image.
+    plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+
+    # Make various adjustments to the plot.
+    plt.tight_layout()
+    plt.colorbar()
+    tick_marks = np.arange(num_classes)
+    plt.xticks(tick_marks, range(num_classes))
+    plt.yticks(tick_marks, range(num_classes))
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
