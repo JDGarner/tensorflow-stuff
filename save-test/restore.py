@@ -9,6 +9,16 @@ import tensorflow as tf
 #     print(sess.run('w1:0'))
 
 
+saver = tf.train.Saver()
+save_dir = 'checkpoints/'
+
+# If the save directory doesn't exist, make it
+if not os.path.exists(save_dir):
+    os.makedirs(save_dir)
+
+
+save_path = os.path.join(save_dir, 'best_validation')
+
 with tf.Session() as sess:
     saver = tf.train.import_meta_graph('my_test_model.meta')
     saver.restore(sess,tf.train.latest_checkpoint('./'))

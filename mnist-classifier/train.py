@@ -24,9 +24,6 @@ num_classes = 10
 
 
 
-# -------------------------------
-# CHECKING THE DATA
-# -------------------------------
 
 # Helper Function to plot images
 def plot_images(images, cls_true, cls_pred=None):
@@ -51,12 +48,16 @@ def plot_images(images, cls_true, cls_pred=None):
         # Remove ticks from the plot.
         ax.set_xticks([])
         ax.set_yticks([])
+    plt.show(block=True)
 
 
+# -------------------------------
+# CHECKING THE DATA
+# -------------------------------
 # Get the true classes for first 10 images, plot them
-images = data.test.images[0:9]
-cls_true = data.test.cls[0:9]
-plot_images(images=images, cls_true=cls_true)
+# images = data.test.images[0:9]
+# cls_true = data.test.cls[0:9]
+# plot_images(images=images, cls_true=cls_true)
 
 
 
@@ -94,7 +95,7 @@ logits = tf.matmul(images_placeholder, weights) + biases
 image_predictions = tf.nn.softmax(logits)
 
 # The most likely class that the network predicted
-image_prediction_class = tf.argmax(image_predictions, dimension=1)
+image_prediction_class = tf.argmax(image_predictions, axis=1)
 
 # To improve classifier need to change the variables for weights and biases
 # First need to compare the prediction outputs to the desired output
@@ -128,7 +129,6 @@ accuracy = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
 # RUNNING TENSORFLOW
 # -------------------------------
 session = tf.Session()
-
 # Initialise the variables for weights and biases
 session.run(tf.global_variables_initializer())
 
@@ -154,7 +154,7 @@ def optimize(num_iterations):
 feed_dict_test = {
   images_placeholder: data.test.images,
   true_image_label_placeholder: data.test.labels,
-  true_image_label_placeholder: data.test.cls
+  true_image_class_placeholder: data.test.cls
 }
 
 # Function for printing accuracy of network on the test data
@@ -168,20 +168,15 @@ def print_accuracy():
 
 # Function for printing and plotting the confusion matrix
 def print_confusion_matrix():
-    # Get the true classifications for the test-set.
-    cls_true = data.test.cls
+    # Get true classes for test-set.
+    true_classes = data.test.cls
     
-    # Get the predicted classifications for the test-set.
-    cls_pred = session.run(y_pred_cls, feed_dict=feed_dict_test)
+    # Get predictions for test-set
+    predicted_classes = session.run(image_prediction_class, feed_dict=feed_dict_test)
 
-    # Get the confusion matrix using sklearn.
-    cm = confusion_matrix(y_true=cls_true,
-                          y_pred=cls_pred)
-
-    # Print the confusion matrix as text.
+    # Get the confusion matrix and plot it
+    cm = confusion_matrix(y_true=true_classes, y_pred=predicted_classes)
     print(cm)
-
-    # Plot the confusion matrix as an image.
     plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
 
     # Make various adjustments to the plot.
@@ -192,3 +187,69 @@ def print_confusion_matrix():
     plt.yticks(tick_marks, range(num_classes))
     plt.xlabel('Predicted')
     plt.ylabel('True')
+
+
+
+# Function for plotting mis-classified images
+def plot_example_errors():
+    # correct = list of booleans for if each image has been correctly classified
+    # predictions = list of predicted class of each image
+    correct, predictions = session.run([correct_predictions, image_prediction_class],
+                                    feed_dict=feed_dict_test)
+
+    # Get incorrectly classified images
+    incorrect = (correct == False)
+    images = data.test.images[incorrect]
+    
+    # Get the true & predicted classes for those images.
+    cls_pred = predictions[incorrect]
+    cls_true = data.test.cls[incorrect]
+    
+    # Plot the first 9 images.
+    plot_images(images=images[0:9],
+                cls_true=cls_true[0:9],
+                cls_pred=cls_pred[0:9])
+
+
+
+
+
+# Function for plotting the weights of the model
+# 10 images are plotted, one for each digit that the model is trained to recognize.
+def plot_weights():
+    # Get the values for the weights from the TensorFlow variable.
+    w = session.run(weights)
+    
+    # Get the lowest and highest values for the weights.
+    w_min = np.min(w)
+    w_max = np.max(w)
+
+    # Create figure with 3x4 sub-plots,
+    # where the last 2 sub-plots are unused.
+    fig, axes = plt.subplots(3, 4)
+    fig.subplots_adjust(hspace=0.3, wspace=0.3)
+
+    for i, ax in enumerate(axes.flat):
+        # Only use the weights for the first 10 sub-plots.
+        if i<10:
+            # Get the weights for the i'th digit and reshape it.
+            # Note that w.shape == (img_size_flat, 10)
+            image = w[:, i].reshape(img_shape)
+
+            # Set the label for the sub-plot.
+            ax.set_xlabel("Weights: {0}".format(i))
+
+            # Plot the image.
+            ax.imshow(image, vmin=w_min, vmax=w_max, cmap='seismic')
+
+        # Remove ticks from each sub-plot.
+        ax.set_xticks([])
+        ax.set_yticks([])
+    plt.show()
+
+
+
+optimize(num_iterations=990)
+print_accuracy()
+plot_example_errors()
+# plot_weights()
