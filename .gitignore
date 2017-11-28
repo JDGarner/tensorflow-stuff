@@ -5,3 +5,7 @@ mnist-classifer/data/*
 *.meta
 *.index
 *.data*
+
+prepare-data/mp3s/*
+prepare-data/wav_files/*
+prepare-data/spectrograms/*
