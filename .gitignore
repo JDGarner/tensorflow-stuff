@@ -6,6 +6,10 @@ mnist-classifer/data/*
 *.index
 *.data*
 
-prepare-data/mp3s/*
-prepare-data/wav_files/*
-prepare-data/spectrograms/*
+
+dataset/classical/mp3s/*
+dataset/classical/wav_files/*
+dataset/classical/spectrograms/*
+dataset/hiphop/mp3s/*
+dataset/hiphop/wav_files/*
+dataset/hiphop/spectrograms/*
